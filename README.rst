@@ -1,3 +1,9 @@
+**THIS REPOSITORY IS NO LONGER MAINTAINED.**
+============================================
+
+Development of the ``dtcwt`` library is now taking place in `another repository
+<https://github.com/xir4n/dtcwt>`_.
+
 Dual-Tree Complex Wavelet Transform library for Python
 ======================================================
 
