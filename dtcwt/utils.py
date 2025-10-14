@@ -95,7 +95,7 @@ def drawcirc(r,w,du,dv,N):
     p = 0.5 + 0.5 * np.sin(np.minimum(np.maximum((np.exp(np.array([-0.5]) * (x**2 + y**2)).T - np.exp((-0.5))) * (r * 3 / w), np.pi/(-2)), np.pi/2))
     return p
 
-def asfarray(X):
+def asfarray_depr(X):
     """Similar to :py:func:`numpy.asfarray` except that this function tries to
     preserve the original datatype of X if it is already a floating point type
     and will pass floating point arrays through directly without copying.
@@ -103,6 +103,25 @@ def asfarray(X):
     """
     X = np.asanyarray(X)
     return np.asfarray(X, dtype=X.dtype)
+
+def asfarray(X, dtype=None):
+    """
+    Version compatible NumPy>=2.0 de np.asfarray
+    - Si X est déjà un tableau flottant, il est renvoyé tel quel.
+    - Sinon, il est converti en float64 (ou dans le dtype demandé).
+    - Aucune copie n'est faite si elle n'est pas nécessaire.
+    """
+    X = np.asanyarray(X)
+
+    # Si déjà flottant → retour direct
+    if np.issubdtype(X.dtype, np.floating):
+        # éventuellement convertir si un dtype différent est explicitement demandé
+        if dtype is not None and X.dtype != np.dtype(dtype):
+            return X.astype(dtype, copy=False)
+        return X
+
+    # Sinon, conversion en float64 (ou dtype spécifié)
+    return X.astype(dtype or np.float64, copy=False)
 
 def appropriate_complex_type_for(X):
     """Return an appropriate complex data type depending on the type of X. If X
