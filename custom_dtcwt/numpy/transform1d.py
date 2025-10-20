@@ -8,8 +8,8 @@ from six.moves import xrange
 from dtcwt.coeffs import biort as _biort, qshift as _qshift
 from dtcwt.defaults import DEFAULT_BIORT, DEFAULT_QSHIFT
 from dtcwt.numpy.common import Pyramid
-import custom_dtcwt.numpy.lowlevel as c_dtcwt
-from dtcwt.numpy.lowlevel import colfilter, coldfilt, colifilt
+import numpy.lowlevel as c_dtcwt
+from dtcwt.numpy.lowlevel_orig import colfilter, coldfilt, colifilt
 from dtcwt.utils import as_column_vector, asfarray
 
 def _zero_pad(l):

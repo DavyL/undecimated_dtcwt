@@ -8,9 +8,9 @@ from six.moves import xrange
 from dtcwt.coeffs import biort as _biort, qshift as _qshift
 from dtcwt.defaults import DEFAULT_BIORT, DEFAULT_QSHIFT
 from dtcwt.utils import appropriate_complex_type_for, asfarray
-import custom_dtcwt.numpy.lowlevel as c_dtcwt
+import dtcwt.numpy.lowlevel as c_dtcwt
 from dtcwt.numpy.common import Pyramid
-from custom_dtcwt.numpy.lowlevel import *
+from dtcwt.numpy.lowlevel import *
 
 def _zero_pad(l):
     ret = []
@@ -58,8 +58,8 @@ class Transform2d(object):
 
 
 
-    def forward_bis(self, X, nlevels=3, include_scale=False):
-        """Perform a *n*-level DTCWT-2D decompostion on a 2D matrix *X*.
+    def forward_undec(self, X, nlevels=3, include_scale=False):
+        """Perform a *n*-level undecimated DTCWT-2D decompostion on a 2D matrix *X*.
 
         :param X: 2D real array
         :param nlevels: Number of levels of wavelet decomposition

@@ -4,7 +4,24 @@ from __future__ import absolute_import
 
 import functools
 import numpy as np
+import dtcwt
 
+
+def compute_wavelet_coefs(image, nlevels = 3):
+    """ 
+    Computes the undecimated dtcwt decomposition of an image and returns it as a numpy array of size [6, N_x, N_y, nlevels]
+    """
+    transform = dtcwt.Transform2d(biort='near_sym_b_bp', qshift='qshift_b_bp')
+
+    # Compute _nlevels_img levels of dtcwt with the defaul wavelet family
+    image_t = transform.forward_undec(image, nlevels=nlevels)
+    img_size_x = image_t.highpasses[0].shape[0]   ## mult. par 2 car les coefficients sont décimés
+    img_size_y = image_t.highpasses[0].shape[1]
+    coefs = np.zeros(shape=(6, img_size_x, img_size_y, nlevels), dtype = type(image_t.highpasses[0][0,0,0])) ##Version "non-décimée" des coefficients
+
+    for depth in range(nlevels):
+        coefs[:,:,:,depth] = np.transpose(image_t.highpasses[depth], (2,0,1))
+    return coefs
 
 def unpack(pyramid, backend='numpy'):
     """ Unpacks a pyramid give back the constituent parts.
@@ -132,11 +149,11 @@ def appropriate_complex_type_for(X):
     """
     X = asfarray(X)
 
-    if np.issubsctype(X.dtype, np.complex64) or np.issubsctype(X.dtype, np.complex128):
+    if np.issubdtype(X.dtype, np.complex64) or np.issubdtype(X.dtype, np.complex128):
         return X.dtype
-    elif np.issubsctype(X.dtype, np.float32):
+    elif np.issubdtype(X.dtype, np.float32):
         return np.complex64
-    elif np.issubsctype(X.dtype, np.float64):
+    elif np.issubdtype(X.dtype, np.float64):
         return np.complex128
 
     # God knows, err on the side of caution
