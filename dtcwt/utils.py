@@ -121,25 +121,31 @@ def asfarray_depr(X):
     X = np.asanyarray(X)
     return np.asfarray(X, dtype=X.dtype)
 
-def asfarray(X, dtype=None):
+
+def asfarray(X, float_dtype=np.float64):
     """
-    Version compatible NumPy>=2.0 de np.asfarray
-    - Si X est déjà un tableau flottant, il est renvoyé tel quel.
-    - Sinon, il est converti en float64 (ou dans le dtype demandé).
-    - Aucune copie n'est faite si elle n'est pas nécessaire.
+    Comportement voulu :
+      - si X est déjà flottant -> on renvoie X tel quel (zéro copie) ;
+      - si X est déjà complexe -> on renvoie X tel quel (zéro copie) ;
+      - sinon (int, bool, etc.) -> conversion en float_dtype (par défaut float64),
+        sans copie superflue.
+
+    Compatible NumPy >= 2.0 et évite toute perte de partie imaginaire.
     """
     X = np.asanyarray(X)
+    dt = X.dtype
 
-    # Si déjà flottant → retour direct
-    if np.issubdtype(X.dtype, np.floating):
-        # éventuellement convertir si un dtype différent est explicitement demandé
-        if dtype is not None and X.dtype != np.dtype(dtype):
-            return X.astype(dtype, copy=False)
+    if np.issubdtype(dt, np.floating):
+        # déjà flottant : on ne promeut pas (on préserve float32 vs float64)
         return X
 
-    # Sinon, conversion en float64 (ou dtype spécifié)
-    return X.astype(dtype or np.float64, copy=False)
+    if np.issubdtype(dt, np.complexfloating):
+        # déjà complexe : surtout ne pas convertir en float
+        return X
 
+    # int, bool, etc. -> on convertit en flottant
+    return X.astype(float_dtype, copy=False)
+    
 def appropriate_complex_type_for(X):
     """Return an appropriate complex data type depending on the type of X. If X
     is already complex, return that, if it is floating point return a complex

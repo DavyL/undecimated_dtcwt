@@ -40,7 +40,7 @@ plt.axis("off")
     
 J_SCALES = 4
 wavelet_coefs = dt.utils.compute_wavelet_coefs(image = resized_im, nlevels=J_SCALES)
-
+print(wavelet_coefs)
 # %%
 for j in range(J_SCALES):
     fig, axs = plt.subplots(1,6, squeeze = False)

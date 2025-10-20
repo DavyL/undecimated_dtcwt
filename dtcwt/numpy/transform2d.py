@@ -240,40 +240,6 @@ class Transform2d(object):
             c_dtcwt.undecimate2D(Yh[level][:,:,0:6:5], q2c, HiLo, level+1)  # Horizontal   (HiLo)
             c_dtcwt.undecimate2D(Yh[level][:,:,2:4:1], q2c, LoHi, level+1)  # Horizontal   (HiLo)
             c_dtcwt.undecimate2D(Yh[level][:,:,1:5:3], q2c, DgDg, level+1)  # Horizontal   (HiLo)
-            #Yh[level] = np.zeros((LoLo.shape[0]>>1, LoLo.shape[1]>>1, 6), dtype=complex_dtype)
-            #Yh[level][:,:,0:6:5] = q2c(HiLo.T)  # Horizontal
-            #Yh[level][:,:,2:4:1] = q2c(LoHi.T)  # Vertical
-            #Yh[level][:,:,1:5:3] = q2c(DgDg.T)  # Diagonal
-
-            
-#            Lo = c_dtcwt.rec_coldfilt_2d(LoLo, 2**(level-1), h0b,h0a).T
-#            Hi = c_dtcwt.rec_coldfilt_2d(LoLo, 2**(level-1), h1b,h1a).T
-#            if len(self.qshift) >= 12:
-#                Ba = c_dtcwt.rec_coldfilt_2d(LoLo, 2**(level-1), h2b,h2a).T
-#
-#
-#            # Do even Qshift filters on columns.
-#            LoLo = c_dtcwt.rec_coldfilt_2d(Lo, 2**(level-1),h0b,h0a).T
-#            HiLo    =   c_dtcwt.rec_coldfilt_2d(Hi,  2**(level-1),h0b,h0a).T  #(-1)
-#            LoHi    =   c_dtcwt.rec_coldfilt_2d(Lo,  2**(level-1),h1b,h1a).T
-#            if len(self.qshift) >=   12:
-#                BaBa =  c_dtcwt.rec_coldfilt_2d(Ba,  2**(level-1),h2b,h2a).T
-#                diag =  BaBa
-#            else:
-#                HiHi =  c_dtcwt.rec_coldfilt_2d(Hi,  2**(level-1),h1b,h1a).T
-#                diag =  HiHi
-#
-            #Yh[level] = np.zeros((LoLo.shape[0], LoLo.shape[1], 6), dtype=complex_dtype)
-            #Yh[level][:,:,0:6:5] = q2c_rec(HiLo, 2**(level))  # Horizontal   (HiLo)
-            #Yh[level][:,:,2:4:1] = q2c_rec(LoHi, 2**(level))  # Vertical     (LoHi)
-            #Yh[level][:,:,1:5:3] = q2c_rec(DgDg, 2**(level))  # Diagonal (HiHi)
-
-            #print(f"Error between Yh and Yh_std at lvl {level} : {np.sum(np.abs(Yh[level][::2**(level+1), ::2**(level+1), :] - Yh_std[level]))}")
-            #print(f"Error between decimated coefs and post decimated Lo at lvl {level} : {np.sum(np.abs((LoLo)[::2**level, ::2**level] - LoLo_std))}")
-            #print(f"Error between decimated coefs and post decimated LoHi at lvl {level} : {np.sum(np.abs((LoHi)[::2**level, ::2**level] - LoHi_std))}")
-            #print(f"Error between decimated coefs and post decimated HiLo at lvl {level} : {np.sum(np.abs((HiLo)[::2**level, ::2**level] - HiLo_std))}")
-            #print(f"Error between decimated coefs and post decimated diag at lvl {level} : {np.sum(np.abs((DgDg)[::2**level, ::2**level] - diag_std))}")
-
 
             if include_scale:
                 Yscale[level] = LoLo
@@ -311,7 +277,7 @@ class Transform2d(object):
 
 
 
-    def forward(self, X, nlevels=3, include_scale=False, zero_pad = True):
+    def forward(self, X, nlevels=3, include_scale=False):
         """Perform a *n*-level DTCWT-2D decompostion on a 2D matrix *X*.
 
         :param X: 2D real array
@@ -339,11 +305,8 @@ class Transform2d(object):
         # FIXME: there's probably a nicer way to do this
         if len(self.qshift) == 8:
             h0a, h0b, g0a, g0b, h1a, h1b, g1a, g1b = self.qshift
-            #print(f'h0b : {h0b}\t h1b : {h1b}')
         elif len(self.qshift) == 12:
             h0a, h0b, g0a, g0b, h1a, h1b, g1a, g1b, h2a, h2b = self.qshift[:10]
-            #print(f'h0b : {h0b}\t h1b : {h1b}\t h2b : {h2b}')
-
         else:
             raise ValueError('Qshift wavelet must have 12 or 8 components.')
 
@@ -395,76 +358,46 @@ class Transform2d(object):
 
             # Do odd top-level filters on rows.
             LoLo = colfilter(Lo,h0o).T
-
-            #Yh[0] = np.zeros((LoLo.shape[0]>>1, LoLo.shape[1]>>1, 6), dtype=complex_dtype)
-            Yh[0] = np.zeros((LoLo.shape[0], LoLo.shape[1], 6), dtype=complex_dtype)
-
-            #temp = undec_q2c(colfilter(Hi,h0o).T)
-            #temp2 = colfilter(Hi,h0o).T
-            #print(f"undec_q2c(colfilter(Hi,h0o).T) has shape : {temp.shape}\t while colfilter(Hi,h0o).T has shape {temp2.shape} \t  while source Hi has shape {Hi.shape}")
-
-            Yh[0][:,:,0:6:5] = undec_q2c(colfilter(Hi,h0o).T)# Horizontal pair
-            Yh[0][:,:,2:4:1] = undec_q2c(colfilter(Lo,h1o).T)     # Vertical pair
+            Yh[0] = np.zeros((LoLo.shape[0] >> 1, LoLo.shape[1] >> 1, 6), dtype=complex_dtype)
+            Yh[0][:,:,0:6:5] = q2c(colfilter(Hi,h0o).T)     # Horizontal pair
+            Yh[0][:,:,2:4:1] = q2c(colfilter(Lo,h1o).T)     # Vertical pair
             if len(self.biort) >= 6:
-                Yh[0][:,:,1:5:3] = undec_q2c(colfilter(Ba,h2o).T)     # Diagonal pair
+                Yh[0][:,:,1:5:3] = q2c(colfilter(Ba,h2o).T)     # Diagonal pair
             else:
-                Yh[0][:,:,1:5:3] = undec_q2c(colfilter(Hi,h1o).T)     # Diagonal pair
+                Yh[0][:,:,1:5:3] = q2c(colfilter(Hi,h1o).T)     # Diagonal pair
 
             if include_scale:
                 Yscale[0] = LoLo
-            #print(f'at level 0 Yh has shape {Yh[0].shape}')
-
 
         for level in xrange(1, nlevels):
             row_size, col_size = LoLo.shape
-            #print(f'At level {level}\t row size is {row_size} and column size is {col_size}')
-            if zero_pad:
-                h0b = _zero_pad(h0b)
-                h0a = _zero_pad(h0a)
-                h1b = _zero_pad(h1b)
-                h1a = _zero_pad(h1a)
-                if len(self.qshift) >= 12:
-                    h2b = _zero_pad(h2b)
-                    h2a = _zero_pad(h2a)
-                    merged_h2 = _mix_list(h2a, h2b)
+            if row_size % 4 != 0:
+                # Extend by 2 rows if no. of rows of LoLo are not divisable by 4
+                LoLo = np.vstack((LoLo[:1,:], LoLo, LoLo[-1:,:]))
 
-                merged_h1 = _mix_list(h1a, h1b)
-                merged_h0 = _mix_list(h0a, h0b)
-            #if row_size % 4 != 0:
-            #    # Extend by 2 rows if no. of rows of LoLo are not divisable by 4
-            #    LoLo = np.vstack((LoLo[:1,:], LoLo, LoLo[-1:,:]))
-#
-            #if col_size % 4 != 0:
-            #    # Extend by 2 cols if no. of cols of LoLo are not divisable by 4
-            #    LoLo = np.hstack((LoLo[:,:1], LoLo, LoLo[:,-1:]))
+            if col_size % 4 != 0:
+                # Extend by 2 cols if no. of cols of LoLo are not divisable by 4
+                LoLo = np.hstack((LoLo[:,:1], LoLo, LoLo[:,-1:]))
 
             # Do even Qshift filters on rows.
-            #Lo = coldfilt(LoLo,h0b, h0a).T
-            #Hi = coldfilt(LoLo,h1b, h1a).T
-            Lo = colfilter(LoLo,merged_h0).T
-            Hi = colfilter(LoLo,merged_h1).T
-            
+            Lo = coldfilt(LoLo,h0b,h0a).T
+            Hi = coldfilt(LoLo,h1b,h1a).T
             if len(self.qshift) >= 12:
-                #Ba = coldfilt(LoLo,h2b, h2a).T
-                Ba = colfilter(LoLo,merged_h2).T
+                Ba = coldfilt(LoLo,h2b,h2a).T
 
             # Do even Qshift filters on columns.
-            #LoLo = (coldfilt(Lo,h0b, h0a).T)
-            LoLo = (colfilter(Lo,merged_h0).T)
+            LoLo = coldfilt(Lo,h0b,h0a).T
 
-
-            Yh[level] = np.zeros((LoLo.shape[0], LoLo.shape[1], 6), dtype=complex_dtype)
-            Yh[level][:,:,0:6:5] = undec_q2c(colfilter(Hi,merged_h0).T)  # Horizontal
-            Yh[level][:,:,2:4:1] = undec_q2c(colfilter(Lo,merged_h1).T)  # Vertical
+            Yh[level] = np.zeros((LoLo.shape[0]>>1, LoLo.shape[1]>>1, 6), dtype=complex_dtype)
+            Yh[level][:,:,0:6:5] = q2c(coldfilt(Hi,h0b,h0a).T)  # Horizontal
+            Yh[level][:,:,2:4:1] = q2c(coldfilt(Lo,h1b,h1a).T)  # Vertical
             if len(self.qshift) >= 12:
-                Yh[level][:,:,1:5:3] = undec_q2c(colfilter(Ba,merged_h2).T)  # Diagonal
+                Yh[level][:,:,1:5:3] = q2c(coldfilt(Ba,h2b,h2a).T)  # Diagonal
             else:
-                Yh[level][:,:,1:5:3] = undec_q2c(colfilter(Hi,merged_h1).T)  # Diagonal
+                Yh[level][:,:,1:5:3] = q2c(coldfilt(Hi,h1b,h1a).T)  # Diagonal
 
             if include_scale:
                 Yscale[level] = LoLo
-
-
 
         Yl = LoLo
 
