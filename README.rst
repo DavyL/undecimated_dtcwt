@@ -1,6 +1,6 @@
 ============================================
 
-This library if a fork of the ``dtcwt`` library  `implemented by
+This library if a fork of the ``dtcwt`` library  `implemented by rjw57
 <https://github.com/rjw57/dtcwt>`_.
 
 A 2D-undecimated DTCWT transform implemented through cyclospinning can be used through either Transform2d.forward_undec() or utils.compute_wavelet_coefs().
