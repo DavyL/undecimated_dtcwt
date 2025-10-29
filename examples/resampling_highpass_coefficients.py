@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#%%
 """Show an example of how to re-sample high-pass DT-CWT coefficients.
 
 """
@@ -81,3 +82,5 @@ title('Up-sampled in the wavelet domain with shifting')
 
 tight_layout()
 savefig('resampling-example.png')
+
+# %%
